@@ -28,7 +28,7 @@ export class Scanner {
       for await (const item of dir) {
         if (item.isDirectory()) {
           dirs.push(resolve(dir.path, item.name));
-        } else if (item.isFile()) {
+        } else if (item.isFile() && item.name.endsWith(".route.ts")) {
           files.push(resolve(dir.path, item.name));
         }
       }
