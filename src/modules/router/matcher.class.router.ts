@@ -3,29 +3,31 @@ import { MatchResult } from "./match-result.class.router";
 export class Matcher {
   static match(route: string, path: string): MatchResult {
     const matchResult = new MatchResult(false);
-    const url = new URL(route);
-    const { pathname, searchParams } = url;
+    const routeUrl = new URL(route);
+    const requestUrl = new URL(path, routeUrl.origin);
+    const { pathname: routePathname } = routeUrl;
+    const { pathname: requestPathname, searchParams } = requestUrl;
 
-    const splittedPath = path.split("/").filter(Boolean);
-    const splittedRoute = pathname.split("/").filter(Boolean);
+    const routeSegments = routePathname.split("/").filter(Boolean);
+    const requestSegments = requestPathname.split("/").filter(Boolean);
 
-    if (splittedPath.length !== splittedRoute.length) {
+    if (routeSegments.length !== requestSegments.length) {
       return matchResult;
     }
 
-    for (let i = 0; i < splittedPath.length; i++) {
-      const pathSegment = splittedPath[i];
-      const routeSegment = splittedRoute[i];
+    for (let i = 0; i < routeSegments.length; i++) {
+      const routeSegment = routeSegments[i];
+      const requestSegment = requestSegments[i];
 
-      if (pathSegment.startsWith("[") && pathSegment.endsWith("]")) {
-        const key = pathSegment.slice(1, -1);
+      if (routeSegment.startsWith("[") && routeSegment.endsWith("]")) {
+        const key = routeSegment.slice(1, -1);
         if (key) {
-          matchResult.pathParams.setParam(key, routeSegment);
+          matchResult.pathParams.setParam(key, requestSegment);
         }
         continue;
       }
 
-      if (pathSegment !== routeSegment) {
+      if (routeSegment !== requestSegment) {
         return matchResult;
       }
     }
