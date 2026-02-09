@@ -66,4 +66,8 @@ export class Scanner {
 
     return finalPath + "/";
   }
+
+  get instances() {
+    return this.getRoutes().then((files) => this.getInstances(files));
+  }
 }

@@ -1,0 +1,47 @@
+import { Env } from "../env/index.env";
+import { PortError } from "../../errors/Port.error";
+import { createServer } from "http";
+import { Router } from "../router/index.router";
+import { Scanner } from "../cli/index.cli";
+
+export class Server {
+  private static instance: Server;
+  private static env = new Env();
+  private server!: ReturnType<typeof createServer>;
+  private router!: Router;
+  private scanner = new Scanner();
+
+  private constructor(
+    public readonly port: number,
+    public readonly host: string,
+    public readonly protocol: "http" | "https",
+  ) {}
+
+  static async create(): Promise<Server> {
+    if (Server.instance) {
+      return Server.instance;
+    }
+
+    const port = +Server.env.safetyGet("PORT");
+    if (isNaN(port) || port <= 0 || port > 65535) throw new PortError(port);
+    const host = Server.env.safetyGet("HOST");
+    const protocol = (Server.env.get("PROTOCOL") || "http") as "http" | "https";
+
+    Server.instance = new Server(port, host, protocol);
+    Server.instance.router = new Router(
+      await Server.instance.scanner.instances,
+    );
+    Server.instance.server = createServer(
+      Server.instance.router.call.bind(Server.instance.router),
+    );
+    return Server.instance;
+  }
+
+  async listen() {
+    this.server.listen(this.port, this.host, () => {
+      console.log(
+        `Server is running at ${this.protocol}://${this.host}:${this.port}`,
+      );
+    });
+  }
+}
