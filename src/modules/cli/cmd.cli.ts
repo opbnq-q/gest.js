@@ -29,14 +29,16 @@ export class CMD {
         "A CLI for gest.js, an ultimate backend framework for Node.js",
       )
       .version(VERSION, "-v, --version", "output the current version")
-      .option("-n, --new <destination>", "create a new project", ".")
+      .option("-n, --new [destination]", "create a new project")
       .action((options, cmd) => {
         if (options.version) {
           console.log(`gest.js CLI version: ${VERSION}`);
         }
-        if (options.new) {
+        if (options.new !== undefined) {
+          const destination =
+            typeof options.new === "string" ? options.new : ".";
           console.log("Creating a new gest.js project...");
-          this.templates.copy(ETemplates.INIT, options.new);
+          this.templates.copy(ETemplates.INIT, destination);
           console.log("Done.");
         }
       });
