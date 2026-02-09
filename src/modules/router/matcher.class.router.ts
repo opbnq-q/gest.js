@@ -22,7 +22,8 @@ export class Matcher {
       if (routeSegment.startsWith("[") && routeSegment.endsWith("]")) {
         const key = routeSegment.slice(1, -1);
         if (key) {
-          matchResult.pathParams.setParam(key, requestSegment);
+          const decodedSegment = decodeURIComponent(requestSegment);
+          matchResult.pathParams.setParam(key, decodedSegment);
         }
         continue;
       }
