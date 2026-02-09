@@ -6,29 +6,54 @@ import { Matcher } from "./matcher.class.router";
 export class Router {
   constructor(public routes: Route[]) {}
 
-  async parseBody(req: IncomingMessage): Promise<JSON | undefined> {
-    const exp =
-      req.method &&
-      ["post", "patch", "put"].includes(req.method.toLowerCase()) &&
-      req.headers["content-type"] === "application/json";
-    if (!exp) return;
-    const body = await new Promise<string>((resolve, reject) => {
-      let data = "";
+  async parseBody(
+    req: IncomingMessage,
+  ): Promise<string | JSON | undefined | Buffer> {
+    const method = req.method?.toLowerCase();
+    const shouldReadBody = method && ["post", "patch", "put"].includes(method);
+    if (!shouldReadBody) return;
+
+    const raw = await new Promise<Buffer>((resolve, reject) => {
+      const chunks: Buffer[] = [];
       req.on("data", (chunk) => {
-        data += chunk;
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
       });
       req.on("end", () => {
-        resolve(data);
+        resolve(Buffer.concat(chunks));
       });
       req.on("error", (err) => {
         reject(err);
       });
     });
-    try {
-      return JSON.parse(body);
-    } catch (e) {
-      return;
+
+    if (!raw.length) return;
+
+    const contentType = (req.headers["content-type"] || "")
+      .toString()
+      .split(";")[0]
+      .trim()
+      .toLowerCase();
+
+    const asText = () => raw.toString("utf8");
+
+    if (contentType === "application/json" || contentType.endsWith("+json")) {
+      try {
+        return JSON.parse(asText());
+      } catch {
+        return asText();
+      }
     }
+
+    if (
+      contentType.startsWith("text/") ||
+      contentType === "application/x-www-form-urlencoded" ||
+      contentType === "application/xml" ||
+      contentType === "application/xhtml+xml"
+    ) {
+      return asText();
+    }
+
+    return raw;
   }
 
   async call(req: IncomingMessage, res: ServerResponse) {

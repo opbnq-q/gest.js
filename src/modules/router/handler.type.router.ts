@@ -6,7 +6,7 @@ import { IncomingMessage, ServerResponse } from "http";
 export type HandlerContext = {
   query: QueryParams;
   path: PathParams;
-  body?: JSON | unknown;
+  body: string | JSON | undefined | Buffer;
   request: IncomingMessage;
   response: ServerResponse;
 };

@@ -8,6 +8,5 @@ route.get(({ query, path }) => {
 });
 
 route.post(({ body }) => {
-  console.log(body);
-  return new Response().json(body as {});
+  return new Response().json({ ...(body as JSON) });
 });
