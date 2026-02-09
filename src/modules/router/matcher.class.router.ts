@@ -3,8 +3,9 @@ import { MatchResult } from "./match-result.class.router";
 export class Matcher {
   static match(route: string, path: string): MatchResult {
     const matchResult = new MatchResult(false);
-    const routeUrl = new URL(route);
-    const requestUrl = new URL(path, routeUrl.origin);
+    const baseUrl = "http://localhost";
+    const routeUrl = new URL(route, baseUrl);
+    const requestUrl = new URL(path, baseUrl);
     const { pathname: routePathname } = routeUrl;
     const { pathname: requestPathname, searchParams } = requestUrl;
 

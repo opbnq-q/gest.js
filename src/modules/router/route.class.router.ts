@@ -41,7 +41,7 @@ export class Route {
   }
 
   get path(): string {
-    if (!this.path) throw new PathIsNotSpecifiedError();
+    if (!this._path) throw new PathIsNotSpecifiedError();
     return this._path as string;
   }
 }

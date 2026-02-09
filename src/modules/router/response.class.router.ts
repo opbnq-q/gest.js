@@ -7,16 +7,19 @@ export class Response {
   constructor(options?: {
     statusCode?: number;
     headers?: Record<string, string>;
+    data?: string;
   }) {
     if (options) {
       if (options.statusCode) this.statusCode = options.statusCode;
       if (options.headers) this.headers = options.headers;
+      if (options.data) this.body = options.data;
     }
   }
 
   json(data: object) {
     this.headers["Content-Type"] = "application/json";
     this.body = JSON.stringify(data);
+    return this;
   }
 
   write(res: ServerResponse) {
