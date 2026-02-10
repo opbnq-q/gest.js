@@ -30,13 +30,13 @@ import { Server } from "@gest/framework";
 
 Server.create().then(s => s.listen())
 ```
-
-# base route (in routes dir, "routes" by default)
+# usage
+## base route (in routes dir, "routes" by default)
 ```typescript
 // routes/index.route.ts (not in src)
-import { Response } from "../src/modules/router/response.class.router";
-import { Route } from "../src/modules/router/route.class.router";
-import * as z from "zod";
+import { Response } from "@gest/framework";
+import { Route } from "@gest/framework";
+import * as z from "@gest/framework";
 
 export const route = new Route();
 
@@ -51,5 +51,37 @@ route.get(
       name: z.string().nonempty(),
     },
   },
+);
+```
+
+## middlewares
+```typescript
+// any file in your project, i defined the middleware 
+// in routes/middlewares/index.middleware.ts 
+// (it doesn't matter, gest scans only .route.ts files)
+import { Middleware } from "@gest/framework";
+import { type HandlerContext } from "@gest/framework";
+import { Response } from "@gest/framework";
+
+export class IndexMiddleware extends Middleware {
+  async call(ctx: HandlerContext): Promise<Response | undefined> {
+    console.log("middleware action");
+    return await super.call(ctx); // next middleware/handler 
+  }
+}
+
+// route
+route.get(
+  (query) => {
+    return new Response().json({
+      message: "hello world",
+    });
+  },
+  {
+    query: {
+      name: z.string().nonempty(),
+    },
+  },
+  new IndexMiddleware(), new AnotherMiddleware, ...
 );
 ```
