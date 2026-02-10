@@ -1,7 +1,9 @@
 # File based typescript framework (bun only now)
 
 # setup
-```bunfig.toml
+
+## important in bunfig.toml
+```.toml
 [install]
 registry = "https://registry.npmjs.org"
 
