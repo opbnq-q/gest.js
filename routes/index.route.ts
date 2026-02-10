@@ -1,6 +1,7 @@
 import { Response } from "../src/modules/router/response.class.router";
 import { Route } from "../src/modules/router/route.class.router";
 import * as z from "zod";
+import { IndexMiddleware } from "./middlewares/index.middleware";
 
 export const route = new Route();
 
@@ -15,4 +16,5 @@ route.get(
       name: z.string().nonempty(),
     },
   },
+  new IndexMiddleware(),
 );

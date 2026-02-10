@@ -1,3 +1,3 @@
-import { Middleware } from "./class.middleware";
+import { Middleware, type Next } from "./class.middleware";
 
-export { Middleware };
+export { Middleware, type Next };

@@ -1,5 +1,6 @@
 import { MethodIsAlreadyDefined } from "../../errors/MethodIsAlreadyDefined.error";
 import { PathIsNotSpecifiedError } from "../../errors/PathIsNotSpecified.error";
+import { Middleware, Next } from "../middleware/index.middleware";
 import { Handler } from "./handler.type.router";
 import { Method } from "./method.type.router";
 import * as z from "zod";
@@ -22,6 +23,7 @@ export class Route {
       {
         handler: Handler;
         validationSchema?: ValidationSchema;
+        middleware: Next;
       }
     >
   > = {};
@@ -32,30 +34,67 @@ export class Route {
     if (method in this.handlers) throw new MethodIsAlreadyDefined(method);
   }
 
-  post(handler: Handler, validationSchema?: ValidationSchema) {
+  get(
+    handler: Handler,
+    validationSchema?: ValidationSchema,
+    ...middlewares: Middleware[]
+  ) {
+    this.validate("get");
+    this.handlers.get = {
+      handler,
+      validationSchema,
+      middleware: Middleware.from(middlewares, handler),
+    };
+  }
+
+  post(
+    handler: Handler,
+    validationSchema?: ValidationSchema,
+    ...middlewares: Middleware[]
+  ) {
     this.validate("post");
     this.handlers.post = {
       handler,
       validationSchema,
+      middleware: Middleware.from(middlewares, handler),
     };
   }
 
-  get(handler: Handler, validationSchema?: ValidationSchema) {
-    this.validate("get");
-    this.handlers.get = { handler, validationSchema };
-  }
-
-  delete(handler: Handler, validationSchema?: ValidationSchema) {
+  delete(
+    handler: Handler,
+    validationSchema?: ValidationSchema,
+    ...middlewares: Middleware[]
+  ) {
     this.validate("delete");
-    this.handlers.delete = { handler, validationSchema };
+    this.handlers.delete = {
+      handler,
+      validationSchema,
+      middleware: Middleware.from(middlewares, handler),
+    };
   }
 
-  patch(handler: Handler, validationSchema?: ValidationSchema) {
-    this.handlers.patch = { handler, validationSchema };
+  patch(
+    handler: Handler,
+    validationSchema?: ValidationSchema,
+    ...middlewares: Middleware[]
+  ) {
+    this.handlers.patch = {
+      handler,
+      validationSchema,
+      middleware: Middleware.from(middlewares, handler),
+    };
   }
 
-  put(handler: Handler, validationSchema?: ValidationSchema) {
-    this.handlers.put = { handler, validationSchema };
+  put(
+    handler: Handler,
+    validationSchema?: ValidationSchema,
+    ...middlewares: Middleware[]
+  ) {
+    this.handlers.put = {
+      middleware: Middleware.from(middlewares, handler),
+      handler,
+      validationSchema,
+    };
   }
 
   set path(value: string) {

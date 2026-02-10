@@ -5,6 +5,7 @@ import { Matcher } from "./matcher.class.router";
 import { BodyParser } from "./body-parser.class.router";
 import { ValidationError } from "../../errors/Validation.error";
 import * as z from "zod";
+import { Middleware } from "../middleware/index.middleware";
 
 export class Router {
   private bodyParser = new BodyParser();
@@ -77,8 +78,11 @@ export class Router {
             ...(await this.bodyParser.parseBody(req)),
           };
           await this.validate(ctx, found!.validationSchema);
-          const response = await found!.handler(ctx);
-          response.write(res);
+          let response;
+          if (Middleware.is(found!.middleware))
+            response = await found!.middleware.call(ctx);
+          else response = await found!.middleware(ctx);
+          response?.write(res);
         } catch (e) {
           res.statusCode = 500;
           res.setHeader("Content-Type", "text/plain");
