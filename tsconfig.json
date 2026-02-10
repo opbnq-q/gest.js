@@ -21,7 +21,6 @@
 
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
 
     // Style Options
     // "noImplicitReturns": true,
@@ -32,6 +31,7 @@
     // "noPropertyAccessFromIndexSignature": true,
 
     // Recommended Options
+    "exactOptionalPropertyTypes": false,
     "strict": true,
     "jsx": "react-jsx",
     "verbatimModuleSyntax": false,
