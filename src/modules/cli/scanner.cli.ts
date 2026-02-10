@@ -1,9 +1,11 @@
 import { join, resolve } from "path";
 import { readdir, mkdir, opendir } from "fs/promises";
 import { Route } from "../router/route.class.router";
+import { Env } from "../env/index.env";
 
 export class Scanner {
-  private readonly ROUTES_DIR = "routes";
+  private readonly env = new Env();
+  private readonly ROUTES_DIR = this.env.get("ROUTES_DIR") ?? "routes";
   private readonly fullRoutersPath: string;
 
   constructor() {

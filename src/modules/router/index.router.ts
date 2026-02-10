@@ -6,6 +6,7 @@ import { Router } from "./class.router";
 import { Response } from "./response.class.router";
 import type { Handler } from "./handler.type.router";
 import type { HandlerContext } from "./handler.type.router";
+import { BodyParser } from "./body-parser.class.router";
 
 export {
   Route,
@@ -16,4 +17,5 @@ export {
   Response,
   Handler,
   type HandlerContext,
+  BodyParser,
 };
