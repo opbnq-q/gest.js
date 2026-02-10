@@ -9,7 +9,7 @@ export class Scanner {
   private readonly fullRoutersPath: string;
 
   constructor() {
-    this.fullRoutersPath = join(".", this.ROUTES_DIR);
+    this.fullRoutersPath = resolve(this.ROUTES_DIR);
   }
 
   async makeDir() {
