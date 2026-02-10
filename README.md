@@ -1,17 +1,37 @@
+# File based typescript framework (bun only now)
+
 # setup
+```bunfig.toml
+[install]
+registry = "https://registry.npmjs.org"
+
+[install.scopes]
+"@jsr" = "https://npm.jsr.io"
+```
+
 ```bash
 bun install
 ```
 
-```bash
-bun src/main.ts
-```
 ## important
 ```.env
 PORT=3000
 HOST=127.0.0.1
 ```
-# base route
+## optional
+```.env
+ROUTES_DIR="src/routes" # "routes" by default
+PROTOCOL="https" # or "http" by default
+```
+
+## index file
+```typescript
+import { Server } from "@gest/framework";
+
+Server.create().then(s => s.listen())
+```
+
+# base route (in routes dir, "routes" by default)
 ```typescript
 // routes/index.route.ts (not in src)
 import { Response } from "../src/modules/router/response.class.router";

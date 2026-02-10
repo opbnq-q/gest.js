@@ -50,7 +50,7 @@ export class Scanner {
   }
 
   transformPathToApi(fullPath: string) {
-    const removedPath = resolve("./routes");
+    const removedPath = this.fullRoutersPath;
     let apiPath = fullPath
       .replace(removedPath, "")
       .replace(/\\/g, "/")
