@@ -1,13 +1,65 @@
-import { Route } from "./route.class.router";
+import { Route, ValidationSchema } from "./route.class.router";
 import type { IncomingMessage, ServerResponse } from "http";
-import { Handler } from "./handler.type.router";
+import { HandlerContext } from "./handler.type.router";
 import { Matcher } from "./matcher.class.router";
 import { BodyParser } from "./body-parser.class.router";
+import { ValidationError } from "../../errors/Validation.error";
+import * as z from "zod";
 
 export class Router {
   private bodyParser = new BodyParser();
 
   constructor(public routes: Route[]) {}
+
+  async validate(ctx: HandlerContext, validationSchema?: ValidationSchema) {
+    if (!validationSchema) return;
+    if (validationSchema.path) {
+      for (const [key, schema] of Object.entries(validationSchema.path)) {
+        const value = ctx.path.getParam(key);
+        try {
+          schema.parse(value);
+        } catch (e) {
+          if (e instanceof z.ZodError) {
+            throw new ValidationError(
+              "path",
+              e.issues.map((err) => err.message).join(", "),
+            );
+          }
+        }
+      }
+    }
+    if (validationSchema.query) {
+      for (const [key, schema] of Object.entries(validationSchema.query)) {
+        const value = ctx.query.getParam(key);
+        try {
+          schema.parse(value);
+        } catch (e) {
+          if (e instanceof z.ZodError) {
+            throw new ValidationError(
+              "query",
+              e.issues.map((err) => err.message).join(", "),
+            );
+          }
+        }
+      }
+    }
+    if (validationSchema.jsonBody) {
+      if (ctx.bodyType !== "json") {
+        throw new ValidationError("body", "Expected JSON body");
+      }
+      const schema = validationSchema.jsonBody;
+      try {
+        schema.parse(ctx.body);
+      } catch (e) {
+        if (e instanceof z.ZodError) {
+          throw new ValidationError(
+            "body",
+            e.issues.map((err) => err.message).join(", "),
+          );
+        }
+      }
+    }
+  }
 
   async call(req: IncomingMessage, res: ServerResponse) {
     req.method = req.method?.toLowerCase() || "get";
@@ -15,17 +67,17 @@ export class Router {
     for (const route of this.routes) {
       const matchResult = Matcher.match(route.path, req.url);
       if (req.method in route.handlers && matchResult.result) {
-        const handler = route.handlers[
-          req.method as keyof typeof route.handlers
-        ] as Handler;
+        const found = route.handlers[req.method as keyof typeof route.handlers];
         try {
-          const response = await handler({
+          const ctx: HandlerContext = {
             query: matchResult.queryParams,
             path: matchResult.pathParams,
             request: req,
             response: res,
-            body: await this.bodyParser.parseBody(req),
-          });
+            ...(await this.bodyParser.parseBody(req)),
+          };
+          await this.validate(ctx, found!.validationSchema);
+          const response = await found!.handler(ctx);
           response.write(res);
         } catch (e) {
           res.statusCode = 500;

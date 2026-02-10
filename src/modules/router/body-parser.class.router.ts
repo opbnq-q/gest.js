@@ -1,6 +1,6 @@
 import type { IncomingMessage } from "http";
 import type {
-  Body,
+  ParsedBody,
   UrlEncodedBody,
   MultipartBody,
   MultipartFile,
@@ -110,10 +110,10 @@ export class BodyParser {
     };
   }
 
-  async parseBody(req: IncomingMessage): Promise<Body> {
+  async parseBody(req: IncomingMessage): Promise<ParsedBody> {
     const method = req.method?.toLowerCase();
     const shouldReadBody = method && ["post", "patch", "put"].includes(method);
-    if (!shouldReadBody) return;
+    if (!shouldReadBody) return {};
 
     const raw = await new Promise<Buffer>((resolve, reject) => {
       const chunks: Buffer[] = [];
@@ -128,7 +128,7 @@ export class BodyParser {
       });
     });
 
-    if (!raw.length) return;
+    if (!raw.length) return {};
 
     const contentTypeHeader = (req.headers["content-type"] || "").toString();
     const [mediaType, ...params] = contentTypeHeader
@@ -148,16 +148,23 @@ export class BodyParser {
 
     if (mediaType === "multipart/form-data") {
       const boundary = getParam("boundary");
-      if (!boundary) return this.toBinaryBody(raw, mediaType);
-      return this.parseMultipart(raw, boundary);
+      if (!boundary) {
+        return { bodyType: "binary", body: this.toBinaryBody(raw, mediaType) };
+      }
+      return {
+        bodyType: "multipart",
+        body: this.parseMultipart(raw, boundary),
+      };
     }
 
     if (mediaType === "application/x-www-form-urlencoded") {
-      return this.parseUrlEncoded(text);
+      return { bodyType: "urlencoded", body: this.parseUrlEncoded(text) };
     }
 
     if (mediaType === "application/json" || mediaType?.endsWith("+json")) {
-      return this.tryParseJson(text) ?? text;
+      const json = this.tryParseJson(text);
+      if (json !== undefined) return { bodyType: "json", body: json };
+      return { bodyType: "text", body: text };
     }
 
     if (
@@ -166,9 +173,13 @@ export class BodyParser {
       mediaType === "application/xml" ||
       mediaType === "application/xhtml+xml"
     ) {
-      return this.tryParseJson(text) ?? text;
+      const json = this.tryParseJson(text);
+      if (json !== undefined) return { bodyType: "json", body: json };
+      return { bodyType: "text", body: text };
     }
 
-    return this.tryParseJson(text) ?? this.toBinaryBody(raw, mediaType);
+    const json = this.tryParseJson(text);
+    if (json !== undefined) return { bodyType: "json", body: json };
+    return { bodyType: "binary", body: this.toBinaryBody(raw, mediaType) };
   }
 }

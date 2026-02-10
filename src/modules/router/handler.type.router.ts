@@ -29,20 +29,31 @@ export type BinaryBody = {
   size: number;
 };
 
-export type Body =
-  | string
-  | JSON
-  | UrlEncodedBody
-  | MultipartBody
-  | BinaryBody
-  | undefined;
+export type BodyType = "json" | "urlencoded" | "multipart" | "binary" | "text";
+
+export type BodyByType = {
+  json: JSON;
+  urlencoded: UrlEncodedBody;
+  multipart: MultipartBody;
+  binary: BinaryBody;
+  text: string;
+};
+
+export type Body = BodyByType[keyof BodyByType] | undefined;
+
+export type ParsedBody =
+  | { bodyType: "json"; body: BodyByType["json"] }
+  | { bodyType: "urlencoded"; body: BodyByType["urlencoded"] }
+  | { bodyType: "multipart"; body: BodyByType["multipart"] }
+  | { bodyType: "binary"; body: BodyByType["binary"] }
+  | { bodyType: "text"; body: BodyByType["text"] }
+  | { bodyType?: undefined; body?: undefined };
 
 export type HandlerContext = {
   query: QueryParams;
   path: PathParams;
-  body: Body;
   request: IncomingMessage;
   response: ServerResponse;
-};
+} & ParsedBody;
 
 export type Handler = (ctx: HandlerContext) => Promise<Response> | Response;

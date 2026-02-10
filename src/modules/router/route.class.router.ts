@@ -2,10 +2,29 @@ import { MethodIsAlreadyDefined } from "../../errors/MethodIsAlreadyDefined.erro
 import { PathIsNotSpecifiedError } from "../../errors/PathIsNotSpecified.error";
 import { Handler } from "./handler.type.router";
 import { Method } from "./method.type.router";
+import * as z from "zod";
+
+export type ValidationSchema = {
+  path?: {
+    [key in string]: z.ZodType;
+  };
+  query?: {
+    [key in string]: z.ZodType;
+  };
+  jsonBody?: z.ZodType;
+};
 
 export class Route {
   private _path: string | undefined;
-  public handlers: Partial<Record<Method, Handler>> = {};
+  public handlers: Partial<
+    Record<
+      Method,
+      {
+        handler: Handler;
+        validationSchema?: ValidationSchema;
+      }
+    >
+  > = {};
 
   constructor() {}
 
@@ -13,27 +32,30 @@ export class Route {
     if (method in this.handlers) throw new MethodIsAlreadyDefined(method);
   }
 
-  post(handler: Handler) {
+  post(handler: Handler, validationSchema?: ValidationSchema) {
     this.validate("post");
-    this.handlers.post = handler;
+    this.handlers.post = {
+      handler,
+      validationSchema,
+    };
   }
 
-  get(handler: Handler) {
+  get(handler: Handler, validationSchema?: ValidationSchema) {
     this.validate("get");
-    this.handlers.get = handler;
+    this.handlers.get = { handler, validationSchema };
   }
 
-  delete(handler: Handler) {
+  delete(handler: Handler, validationSchema?: ValidationSchema) {
     this.validate("delete");
-    this.handlers.delete = handler;
+    this.handlers.delete = { handler, validationSchema };
   }
 
-  patch(handler: Handler) {
-    this.handlers.patch = handler;
+  patch(handler: Handler, validationSchema?: ValidationSchema) {
+    this.handlers.patch = { handler, validationSchema };
   }
 
-  put(handler: Handler) {
-    this.handlers.put = handler;
+  put(handler: Handler, validationSchema?: ValidationSchema) {
+    this.handlers.put = { handler, validationSchema };
   }
 
   set path(value: string) {
