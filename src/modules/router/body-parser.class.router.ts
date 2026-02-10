@@ -75,12 +75,12 @@ export class BodyParser {
 
       if (filenameMatch) {
         files.push({
-          name,
-          filename: filenameMatch[1],
-          contentType: headers["content-type"],
           data: body.toString("base64"),
           encoding: "base64",
           size: body.length,
+          filename: filenameMatch[1] ?? "",
+          contentType: headers["content-type"] || "application/octet-stream",
+          name,
         });
       } else if (name) {
         const text = body.toString("utf8");

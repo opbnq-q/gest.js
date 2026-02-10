@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { Server } from "./modules/server/class.server";
 
-const server = await Server.create();
+const server = Server.create();
 
-server.listen();
+server.then((s) => s.listen());
