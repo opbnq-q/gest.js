@@ -17,8 +17,8 @@ export class Matcher {
     }
 
     for (let i = 0; i < routeSegments.length; i++) {
-      const routeSegment = routeSegments[i];
-      const requestSegment = requestSegments[i];
+      const routeSegment = routeSegments[i] as string;
+      const requestSegment = requestSegments[i] as string;
 
       if (routeSegment.startsWith("[") && routeSegment.endsWith("]")) {
         const key = routeSegment.slice(1, -1);
