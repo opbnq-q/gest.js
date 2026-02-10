@@ -1,6 +1,16 @@
 # setup
-```bun install``` \
-```bun src/main.ts```
+```bash
+bun install
+```
+
+```bash
+bun src/main.ts
+```
+## important
+```.env
+PORT=3000
+HOST=127.0.0.1
+```
 # base route
 ```typescript
 // routes/index.route.ts (not in src)
