@@ -1,4 +1,4 @@
-import { EmptyEnvError } from "../../errors/EmptyEnv.error";
+import { EmptyEnvError } from "../../errors/index.errors";
 
 export class Env {
   private readonly env: Record<string, string>;

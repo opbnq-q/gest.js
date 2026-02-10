@@ -1,5 +1,5 @@
 import { Env } from "../env/index.env";
-import { PortError } from "../../errors/Port.error";
+import { PortError } from "../../errors/index.errors";
 import { createServer } from "http";
 import { Router } from "../router/index.router";
 import { Scanner } from "../cli/index.cli";

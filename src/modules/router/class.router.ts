@@ -3,7 +3,7 @@ import type { IncomingMessage, ServerResponse } from "http";
 import { HandlerContext } from "./handler.type.router";
 import { Matcher } from "./matcher.class.router";
 import { BodyParser } from "./body-parser.class.router";
-import { ValidationError } from "../../errors/Validation.error";
+import { ValidationError } from "../../errors/index.errors";
 import * as z from "zod";
 import { Middleware } from "../middleware/index.middleware";
 

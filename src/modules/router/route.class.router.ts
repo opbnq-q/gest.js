@@ -1,5 +1,7 @@
-import { MethodIsAlreadyDefined } from "../../errors/MethodIsAlreadyDefined.error";
-import { PathIsNotSpecifiedError } from "../../errors/PathIsNotSpecified.error";
+import {
+  MethodIsAlreadyDefined,
+  PathIsNotSpecifiedError,
+} from "../../errors/index.errors";
 import { Middleware, Next } from "../middleware/index.middleware";
 import { Handler } from "./handler.type.router";
 import { Method } from "./method.type.router";
