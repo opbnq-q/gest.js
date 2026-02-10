@@ -12,7 +12,7 @@ registry = "https://registry.npmjs.org"
 ```
 
 ```bash
-bun install
+bunx jsr add @gest/framework
 ```
 
 ## important
