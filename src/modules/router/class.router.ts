@@ -5,11 +5,22 @@ import { Matcher } from "./matcher.class.router";
 import { BodyParser } from "./body-parser.class.router";
 import { Middleware } from "../middleware/index.middleware";
 import { HttpException } from "../../exceptions/index.exceptions";
+import { IPlugin } from "../plugin/index.plugin";
+import { MatchResult } from "./index.router";
 
 export class Router {
   private bodyParser = new BodyParser();
 
-  constructor(public routes: Route[]) {}
+  constructor(
+    public routes: Route[],
+    public readonly plugins: IPlugin[],
+  ) {}
+
+  async callPlugins(matchResult: MatchResult, route: Route) {
+    for (const plugin of this.plugins) {
+      if (plugin.call) await plugin.call(matchResult, route);
+    }
+  }
 
   async call(req: IncomingMessage, res: ServerResponse) {
     req.method = req.method?.toLowerCase() || "get";
@@ -20,6 +31,9 @@ export class Router {
       if (req.method in route.handlers && matchResult.result) {
         handled = true;
         const found = route.handlers[req.method as keyof typeof route.handlers];
+
+        await this.callPlugins(matchResult, route);
+
         try {
           const ctx: HandlerContext = {
             query: matchResult.queryParams,

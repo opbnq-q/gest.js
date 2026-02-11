@@ -5,11 +5,13 @@ import {
   Response,
   PathParams,
   QueryParams,
+  BodyParser,
+  HandlerContext,
+  Handler,
+  MatchResult,
 } from "../modules/router/index.router";
 import { Middleware } from "../modules/middleware/index.middleware";
-import type { HandlerContext, Handler } from "../modules/router/index.router";
 import { Env } from "../modules/env/index.env";
-import { BodyParser } from "../modules/router/index.router";
 import * as z from "zod";
 import {
   HttpException,
@@ -21,8 +23,9 @@ export {
   Server,
   Route,
   Middleware,
-  HandlerContext,
-  Handler,
+  type HandlerContext,
+  type Handler,
+  MatchResult,
   Env,
   Response,
   PathParams,

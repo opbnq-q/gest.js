@@ -7,8 +7,10 @@ import { Response } from "./response.class.router";
 import type { Handler } from "./handler.type.router";
 import type { HandlerContext } from "./handler.type.router";
 import { BodyParser } from "./body-parser.class.router";
+import { MatchResult } from "./match-result.class.router";
 
 export {
+  MatchResult,
   Route,
   Matcher,
   PathParams,

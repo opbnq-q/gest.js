@@ -16,6 +16,7 @@ export class Server {
     public readonly port: number,
     public readonly host: string,
     public readonly protocol: "http" | "https",
+    public readonly plugins: IPlugin[],
   ) {}
 
   static async create(plugins: IPlugin[] = []): Promise<Server> {
@@ -28,15 +29,17 @@ export class Server {
     const host = Server.env.safetyGet("HOST");
     const protocol = (Server.env.get("PROTOCOL") || "http") as "http" | "https";
 
-    Server.instance = new Server(port, host, protocol);
+    Server.instance = new Server(port, host, protocol, plugins);
 
     const routes = await Server.instance.scanner.instances;
-    Server.instance.router = new Router(routes);
+    Server.instance.router = new Router(routes, plugins);
 
     for (const route of routes) {
       for (const plugin of plugins) {
-        await plugin.call(route);
-        console.log(`Plugin ${plugin.name} applied.`);
+        if (plugin.activate) {
+          await plugin.activate(route);
+          console.log(`Plugin ${plugin.name} applied.`);
+        }
       }
     }
 

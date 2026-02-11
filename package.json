@@ -1,6 +1,6 @@
 {
   "name": "@gest/framework",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "gest.js framework CLI",
   "devDependencies": {
     "@types/node": "^25.2.2",
