@@ -25,7 +25,7 @@ export class Middleware {
       past.link(middlewares[i] as Middleware);
       past = middlewares[i] as Middleware;
     }
-    first.link(handler);
+    past.link(handler);
     return first;
   }
 

@@ -1,9 +1,10 @@
 import {
   MethodIsAlreadyDefined,
   PathIsNotSpecifiedError,
+  ValidationError,
 } from "../../errors/index.errors";
 import { Middleware, Next } from "../middleware/index.middleware";
-import { Handler } from "./handler.type.router";
+import { Handler, HandlerContext } from "./handler.type.router";
 import { Method } from "./method.type.router";
 import * as z from "zod";
 
@@ -32,6 +33,70 @@ export class Route {
 
   constructor() {}
 
+  private wrapHandler(
+    handler: Handler,
+    validationSchema?: ValidationSchema,
+  ): Handler {
+    if (!validationSchema) return handler;
+    return async (ctx) => {
+      await Route.validate(ctx, validationSchema);
+      return await handler(ctx);
+    };
+  }
+
+  static async validate(
+    ctx: HandlerContext,
+    validationSchema?: ValidationSchema,
+  ) {
+    if (!validationSchema) return;
+    if (validationSchema.path) {
+      for (const [key, schema] of Object.entries(validationSchema.path)) {
+        const value = ctx.path.getParam(key);
+        try {
+          schema.parse(value);
+        } catch (e) {
+          if (e instanceof z.ZodError) {
+            throw new ValidationError(
+              "path",
+              e.issues.map((err) => err.message).join(", "),
+            );
+          }
+        }
+      }
+    }
+    if (validationSchema.query) {
+      for (const [key, schema] of Object.entries(validationSchema.query)) {
+        const value = ctx.query.getParam(key);
+        try {
+          schema.parse(value);
+        } catch (e) {
+          if (e instanceof z.ZodError) {
+            throw new ValidationError(
+              "query",
+              e.issues.map((err) => err.message).join(", "),
+            );
+          }
+        }
+      }
+    }
+    if (validationSchema.jsonBody) {
+      if (ctx.bodyType !== "json") {
+        throw new ValidationError("body", "Expected JSON body");
+      }
+      const schema = validationSchema.jsonBody;
+      try {
+        schema.parse(ctx.body);
+      } catch (e) {
+        if (e instanceof z.ZodError) {
+          throw new ValidationError(
+            "body",
+            e.issues.map((err) => err.message).join(", "),
+          );
+        }
+      }
+    }
+  }
+
   validate(method: Method) {
     if (method in this.handlers) throw new MethodIsAlreadyDefined(method);
   }
@@ -42,10 +107,11 @@ export class Route {
     ...middlewares: Middleware[]
   ) {
     this.validate("get");
+    const wrappedHandler = this.wrapHandler(handler, validationSchema);
     this.handlers.get = {
-      handler,
+      handler: wrappedHandler,
       validationSchema,
-      middleware: Middleware.from(middlewares, handler),
+      middleware: Middleware.from(middlewares, wrappedHandler),
     };
   }
 
@@ -55,10 +121,11 @@ export class Route {
     ...middlewares: Middleware[]
   ) {
     this.validate("post");
+    const wrappedHandler = this.wrapHandler(handler, validationSchema);
     this.handlers.post = {
-      handler,
+      handler: wrappedHandler,
       validationSchema,
-      middleware: Middleware.from(middlewares, handler),
+      middleware: Middleware.from(middlewares, wrappedHandler),
     };
   }
 
@@ -68,10 +135,11 @@ export class Route {
     ...middlewares: Middleware[]
   ) {
     this.validate("delete");
+    const wrappedHandler = this.wrapHandler(handler, validationSchema);
     this.handlers.delete = {
-      handler,
+      handler: wrappedHandler,
       validationSchema,
-      middleware: Middleware.from(middlewares, handler),
+      middleware: Middleware.from(middlewares, wrappedHandler),
     };
   }
 
@@ -80,10 +148,11 @@ export class Route {
     validationSchema?: ValidationSchema,
     ...middlewares: Middleware[]
   ) {
+    const wrappedHandler = this.wrapHandler(handler, validationSchema);
     this.handlers.patch = {
-      handler,
+      handler: wrappedHandler,
       validationSchema,
-      middleware: Middleware.from(middlewares, handler),
+      middleware: Middleware.from(middlewares, wrappedHandler),
     };
   }
 
@@ -92,9 +161,10 @@ export class Route {
     validationSchema?: ValidationSchema,
     ...middlewares: Middleware[]
   ) {
+    const wrappedHandler = this.wrapHandler(handler, validationSchema);
     this.handlers.put = {
-      middleware: Middleware.from(middlewares, handler),
-      handler,
+      middleware: Middleware.from(middlewares, wrappedHandler),
+      handler: wrappedHandler,
       validationSchema,
     };
   }
