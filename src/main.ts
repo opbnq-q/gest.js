@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { Server } from "./modules/server/index.server";
+import * as e from "./errors/index.errors";
 import {
   Route,
   Response,
@@ -24,4 +25,5 @@ export {
   QueryParams,
   z,
   BodyParser,
+  e,
 };
