@@ -3,6 +3,7 @@ import { PortError } from "../../errors/index.errors";
 import { createServer } from "http";
 import { Router } from "../router/index.router";
 import { Scanner } from "../cli/index.cli";
+import { type IPlugin } from "../plugin/index.plugin";
 
 export class Server {
   private static instance: Server;
@@ -17,7 +18,7 @@ export class Server {
     public readonly protocol: "http" | "https",
   ) {}
 
-  static async create(): Promise<Server> {
+  static async create(plugins: IPlugin[] = []): Promise<Server> {
     if (Server.instance) {
       return Server.instance;
     }
@@ -28,9 +29,17 @@ export class Server {
     const protocol = (Server.env.get("PROTOCOL") || "http") as "http" | "https";
 
     Server.instance = new Server(port, host, protocol);
-    Server.instance.router = new Router(
-      await Server.instance.scanner.instances,
-    );
+
+    const routes = await Server.instance.scanner.instances;
+    Server.instance.router = new Router(routes);
+
+    for (const route of routes) {
+      for (const plugin of plugins) {
+        await plugin.call(route);
+        console.log(`Plugin ${plugin.name} applied.`);
+      }
+    }
+
     Server.instance.server = createServer(
       Server.instance.router.call.bind(Server.instance.router),
     );

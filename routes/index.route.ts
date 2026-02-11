@@ -1,4 +1,4 @@
-import { Response, Route, z } from "../src/main";
+import { Response, Route, z } from "../src/entrypoint/exports.entrypoint";
 
 export const route = new Route();
 

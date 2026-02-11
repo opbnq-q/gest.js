@@ -1,3 +1,15 @@
-import { Server } from "../src/main";
+import {
+  Route,
+  Server,
+  type IPlugin,
+} from "../src/entrypoint/exports.entrypoint";
 
-Server.create().then((s) => s.listen());
+class Plugin implements IPlugin {
+  name = "Test";
+
+  call(route: Route) {
+    console.log(route.path);
+  }
+}
+
+Server.create([new Plugin()]).then((s) => s.listen());
