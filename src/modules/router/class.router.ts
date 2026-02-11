@@ -4,6 +4,7 @@ import { HandlerContext } from "./handler.type.router";
 import { Matcher } from "./matcher.class.router";
 import { BodyParser } from "./body-parser.class.router";
 import { Middleware } from "../middleware/index.middleware";
+import { HttpException } from "../../exceptions/index.exceptions";
 
 export class Router {
   private bodyParser = new BodyParser();
@@ -33,6 +34,13 @@ export class Router {
           else response = await found!.middleware(ctx);
           response?.write(res);
         } catch (e) {
+          if (e instanceof HttpException) {
+            res.statusCode = e.statusCode;
+            res.setHeader("Content-Type", "application/json");
+            res.write(JSON.stringify({ error: e.message }));
+            res.end();
+            return;
+          }
           res.statusCode = 500;
           res.setHeader("Content-Type", "text/plain");
           res.write("Internal Server Error");

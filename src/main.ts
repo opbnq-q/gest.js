@@ -1,6 +1,5 @@
 import "dotenv/config";
 import { Server } from "./modules/server/index.server";
-import * as e from "./errors/index.errors";
 import {
   Route,
   Response,
@@ -12,6 +11,10 @@ import type { HandlerContext, Handler } from "./modules/router/index.router";
 import { Env } from "./modules/env/index.env";
 import { BodyParser } from "./modules/router/index.router";
 import * as z from "zod";
+import {
+  HttpException,
+  ValidationException,
+} from "./exceptions/index.exceptions";
 
 export {
   Server,
@@ -25,5 +28,6 @@ export {
   QueryParams,
   z,
   BodyParser,
-  e,
+  HttpException,
+  ValidationException,
 };

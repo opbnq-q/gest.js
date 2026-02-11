@@ -1,8 +1,8 @@
 import {
   MethodIsAlreadyDefined,
   PathIsNotSpecifiedError,
-  ValidationError,
 } from "../../errors/index.errors";
+import { ValidationException } from "../../exceptions/index.exceptions";
 import { Middleware, Next } from "../middleware/index.middleware";
 import { Handler, HandlerContext } from "./handler.type.router";
 import { Method } from "./method.type.router";
@@ -56,7 +56,7 @@ export class Route {
           schema.parse(value);
         } catch (e) {
           if (e instanceof z.ZodError) {
-            throw new ValidationError(
+            throw new ValidationException(
               "path",
               e.issues.map((err) => err.message).join(", "),
             );
@@ -71,7 +71,7 @@ export class Route {
           schema.parse(value);
         } catch (e) {
           if (e instanceof z.ZodError) {
-            throw new ValidationError(
+            throw new ValidationException(
               "query",
               e.issues.map((err) => err.message).join(", "),
             );
@@ -81,14 +81,14 @@ export class Route {
     }
     if (validationSchema.jsonBody) {
       if (ctx.bodyType !== "json") {
-        throw new ValidationError("body", "Expected JSON body");
+        throw new ValidationException("body", "Expected JSON body");
       }
       const schema = validationSchema.jsonBody;
       try {
         schema.parse(ctx.body);
       } catch (e) {
         if (e instanceof z.ZodError) {
-          throw new ValidationError(
+          throw new ValidationException(
             "body",
             e.issues.map((err) => err.message).join(", "),
           );
