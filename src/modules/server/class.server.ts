@@ -50,6 +50,7 @@ export class Server {
   }
 
   async listen() {
+    this.plugins.forEach((plugin) => plugin?.init?.());
     this.server.listen(this.port, this.host, () => {
       console.log(
         `Server is running at ${this.protocol}://${this.host}:${this.port}`,

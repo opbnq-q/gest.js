@@ -5,4 +5,5 @@ export interface IPlugin {
   name: string;
   activate?(route: Route): Promise<void> | void;
   call?(matchResult: MatchResult, route: Route): Promise<void> | void;
+  init?(): Promise<void> | void;
 }

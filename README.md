@@ -87,3 +87,20 @@ route.get(
   new IndexMiddleware(), new AnotherMiddleware, ...
 );
 ```
+
+# Plugins
+
+## implements IPlugin interface
+```typescript
+interface IPlugin {
+  name: string; // name of your plugin
+  activate?(route: Route): Promise<void> | void; // once when router is registered
+  call?(matchResult: MatchResult, route: Route): Promise<void> | void; // when handler works
+  init?(): Promise<void> | void; // once when all routes are registered
+}
+```
+
+## connect
+```typescript
+Server.create([new MyPlugin]) // an array of plugins
+```
