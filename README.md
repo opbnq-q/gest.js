@@ -96,7 +96,7 @@ interface IPlugin {
   name: string; // name of your plugin
   activate?(route: Route): Promise<void> | void; // once when router is registered
   call?(matchResult: MatchResult, route: Route): Promise<void> | void; // when handler works
-  init?(): Promise<void> | void; // once when all routes are registered
+  init?(): Promise<void> | void; // once before listen
 }
 ```
 
